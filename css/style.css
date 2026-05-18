@@ -575,8 +575,8 @@ p { margin: 0; }
 
 /* page-hero (smaller variant for inner pages) */
 .page-hero {
-  padding-top: calc(var(--nav-h) * 0.5 + 8px);
-  padding-bottom: clamp(16px, 2vw, 24px);
+  padding-top: 90px;
+  padding-bottom: 16px;
   padding-left: var(--pad-x);
   padding-right: var(--pad-x);
   position: relative;
