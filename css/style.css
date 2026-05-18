@@ -1317,6 +1317,23 @@ p { margin: 0; }
     text-align: center;
   }
   .footer__logo, .footer__right { justify-content: center; display: flex; }
+  .float-card__inner {
+    min-height: auto;
+    overflow: visible;
+    border-radius: 0;
+    border: none;
+  }
+  .float-card__inner img {
+    position: relative;
+    height: 320px;
+    border-radius: var(--r-lg);
+    width: 100%;
+    object-fit: cover;
+  }
+  .float-card__inner::after {
+    border-radius: var(--r-lg);
+    background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.85));
+  }
   .float-card__panel {
     position: relative;
     top: auto;
@@ -1326,8 +1343,6 @@ p { margin: 0; }
     max-width: calc(100% - 32px);
     z-index: 2;
   }
-  .float-card__inner { min-height: auto; }
-  .float-card__inner img { position: relative; height: 320px; }
   .float-card__inner::after { background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.95)); }
   .hero { min-height: 720px; }
 }
