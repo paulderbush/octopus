@@ -1,7 +1,8 @@
 // Octopus Law — site interactions
 
 (function () {
-  const EMAIL = "info@octopus.law";
+  // Replace with the access key from web3forms.com (sent to info@octopus.law)
+  const WEB3FORMS_KEY = "YOUR_ACCESS_KEY_HERE";
 
   /* ------------------------------------------------------------ */
   /* Mobile menu                                                  */
@@ -26,7 +27,6 @@
 
     overlay.querySelectorAll("a").forEach(a => {
       a.addEventListener("click", () => {
-        // delay so the navigation/smooth-scroll feels intentional
         setTimeout(shut, 80);
       });
     });
@@ -43,7 +43,6 @@
     const targets = document.querySelectorAll(".reveal");
     if (!targets.length) return;
 
-    // index for stagger groups
     document.querySelectorAll(".stagger").forEach(group => {
       [...group.children].forEach((child, i) => {
         child.style.setProperty("--i", i);
@@ -90,26 +89,70 @@
   }
 
   /* ------------------------------------------------------------ */
-  /* Form — open mail client with prefilled body                  */
+  /* Form — send via Web3Forms to info@octopus.law                */
   /* ------------------------------------------------------------ */
   function initForm() {
     const form = document.querySelector("#request-form, form.request-form");
     if (!form) return;
-    form.addEventListener("submit", e => {
+
+    form.addEventListener("submit", async e => {
       e.preventDefault();
+
+      const status = form.querySelector(".form-status");
+      const btn = form.querySelector(".submit-btn");
+
       const data = new FormData(form);
-      const name = (data.get("name") || "").toString().trim();
+      const name  = (data.get("name")  || "").toString().trim();
       const email = (data.get("email") || "").toString().trim();
       const brief = (data.get("brief") || "").toString().trim();
 
-      const subject = encodeURIComponent(`New enquiry — ${name || "Private client"}`);
-      const body = encodeURIComponent(
-        `Name: ${name}\nEmail: ${email}\n\nBrief:\n${brief}\n\n—\nSent via octopus.law`
-      );
-      window.location.href = `mailto:${EMAIL}?subject=${subject}&body=${body}`;
+      if (!name || !email || !brief) {
+        if (status) {
+          status.textContent = "Please fill in all fields.";
+          status.style.color = "#e07070";
+        }
+        return;
+      }
 
-      const status = form.querySelector(".form-status");
-      if (status) status.textContent = "Opening your mail client…";
+      if (btn) { btn.disabled = true; btn.style.opacity = "0.6"; }
+      if (status) { status.textContent = "Sending…"; status.style.color = ""; }
+
+      const page = document.title.replace(" - Octopus Law", "").replace("Octopus Law - ", "").trim();
+
+      try {
+        const res = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({
+            access_key: WEB3FORMS_KEY,
+            subject: `New enquiry from ${name || "Private client"} — ${page}`,
+            name,
+            email,
+            message: brief,
+            from_name: "Octopus Law Website"
+          })
+        });
+
+        const json = await res.json();
+
+        if (json.success) {
+          if (status) {
+            status.textContent = "Your message has been sent. We will be in touch shortly.";
+            status.style.color = "";
+          }
+          form.reset();
+        } else {
+          throw new Error(json.message || "Submission failed");
+        }
+      } catch (err) {
+        if (status) {
+          status.textContent = "Something went wrong. Please email us directly at info@octopus.law";
+          status.style.color = "#e07070";
+        }
+        console.error("Form error:", err);
+      } finally {
+        if (btn) { btn.disabled = false; btn.style.opacity = ""; }
+      }
     });
   }
 
